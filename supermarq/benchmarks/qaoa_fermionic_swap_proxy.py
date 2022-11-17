@@ -29,15 +29,16 @@ class QAOAFermionicSwapProxy(Benchmark):
         2. Finding approximately optimal angles (rather than random values)
     """
 
-    def __init__(self, num_qubits: int) -> None:
+    def __init__(self, num_qubits: int, no_sim: bool = False) -> None:
         """Generate a new benchmark instance.
 
         Args:
             num_qubits: The number of nodes (qubits) within the SK graph.
+            no_sim: Use pseudorandom angles instead of finding angles with simulatiom
         """
         self.num_qubits = num_qubits
         self.hamiltonian = self._gen_sk_hamiltonian()
-        self.params = self._gen_angles()
+        self.params = self._random_angles() if no_sim else self._gen_angles()
 
     def _gen_sk_hamiltonian(self) -> List:
         """Randomly pick +1 or -1 for each edge weight."""
@@ -142,6 +143,11 @@ class QAOAFermionicSwapProxy(Benchmark):
                 best_params = params
                 best_cost = cost
         return best_params
+
+    def _random_angles(self) -> List:
+        rng = np.random.default_rng(420)
+        params = [rng.uniform() * 2 * np.pi, rng.uniform() * 2 * np.pi]
+        return params
 
     def circuit(self) -> cirq.Circuit:
         """Generate a QAOA circuit for the Sherrington-Kirkpatrick model.

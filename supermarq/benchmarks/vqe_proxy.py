@@ -21,11 +21,11 @@ class VQEProxy(supermarq.benchmark.Benchmark):
     to the noiseless values.
     """
 
-    def __init__(self, num_qubits: int, num_layers: int = 1) -> None:
+    def __init__(self, num_qubits: int, num_layers: int = 1, no_sim: bool = False) -> None:
         self.num_qubits = num_qubits
         self.num_layers = num_layers
         self.hamiltonian = self._gen_tfim_hamiltonian()
-        self._params = self._gen_angles()
+        self._params = self._random_angles() if no_sim else self._gen_angles()
 
     def _gen_tfim_hamiltonian(self) -> List:
         r"""Generate an n-qubit Hamiltonian for a transverse-field Ising model (TFIM).
@@ -135,6 +135,11 @@ class VQEProxy(supermarq.benchmark.Benchmark):
         the final parameters.
         """
         params, _ = self._get_opt_angles()
+        return params
+
+    def _random_angles(self) -> List:
+        rng = np.random.default_rng(420)
+        params = [rng.uniform() * 2 * np.pi for _ in range(self.num_layers * 4 * self.num_qubits)]
         return params
 
     def circuit(self) -> List[cirq.Circuit]:
