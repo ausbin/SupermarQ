@@ -37,17 +37,18 @@ class QAOAFermionicSwapProxy(Benchmark):
             no_sim: Use pseudorandom angles instead of finding angles with simulatiom
         """
         self.num_qubits = num_qubits
-        self.hamiltonian = self._gen_sk_hamiltonian()
+        self.hamiltonian = self._gen_sk_hamiltonian(no_sim)
         self.params = self._random_angles() if no_sim else self._gen_angles()
 
-    def _gen_sk_hamiltonian(self) -> List:
+    def _gen_sk_hamiltonian(self, deterministic: bool = False) -> List:
         """Randomly pick +1 or -1 for each edge weight."""
+        rng = np.random.default_rng(seed=(420 if deterministic else None))
         hamiltonian = []
         for i in range(self.num_qubits):
             for j in range(i + 1, self.num_qubits):
-                hamiltonian.append([i, j, np.random.choice([-1, 1])])
+                hamiltonian.append([i, j, rng.choice([-1, 1])])
 
-        np.random.shuffle(hamiltonian)
+        rng.shuffle(hamiltonian)
 
         return hamiltonian
 
